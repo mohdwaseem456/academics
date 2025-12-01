@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StudentRegistrationController;
+use App\Http\Controllers\StudentPaperController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\FacultyController;
@@ -43,6 +44,8 @@ Route::middleware('auth:api')->group(function () {
         Route::put('registrations/{id}/approve', [FacultyController::class, 'approveStudent']);
         Route::put('registrations/{id}/reject', [FacultyController::class, 'rejectStudent']);
         Route::post('/admission', [AdmissionController::class, 'giveAdmission']);
+        // POST /api/student-paper
+        Route::post('student_paper', [StudentPaperController::class, 'assign']);
 
 
         
