@@ -4,9 +4,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StudentRegistrationController;
 use App\Http\Controllers\StudentPaperController;
+use App\Http\Controllers\ProgrammeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdmissionController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\FacultyController;
+use App\Http\Controllers\PaperController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,12 +44,19 @@ Route::middleware('auth:api')->group(function () {
         
         
         Route::get('registrations', [FacultyController::class, 'showRegistrations']);
-        Route::put('registrations/{id}/approve', [FacultyController::class, 'approveStudent']);
-        Route::put('registrations/{id}/reject', [FacultyController::class, 'rejectStudent']);
+        Route::put('registrations/{id}/approval', [FacultyController::class, 'approveStudent']);
+        Route::put('registrations/{id}/rejection', [FacultyController::class, 'rejectStudent']);
         Route::post('/admission', [AdmissionController::class, 'giveAdmission']);
-        // POST /api/student-paper
         Route::post('student_paper', [StudentPaperController::class, 'assign']);
-
+        Route::post('/attendances', [AttendanceController::class, 'bulkMark']);
+        Route::get('/batchattendances', [AttendanceController::class, 'showBatchAttendance']);
+        Route::get('/programmeattendances', [AttendanceController::class, 'showProgrammeAttendance']);
+        Route::get('/programmestudents', [ProgrammeController::class, 'showProgrammeStudents']);
+                                      ///////
+        Route::post('/paper_assessments', [PaperController::class, 'assignAssessment']);
+        Route::post('/mark_assessment', [PaperController::class, 'markEntry']);
+        Route::get('/mark_assessment', [PaperController::class, 'showMarklist']);
+        Route::post('/mark_paper', [PaperController::class, 'markFinalise']);
 
         
     });

@@ -18,6 +18,11 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+
+        // Your custom event → listener mapping
+        \App\Events\StudentRegistrationProcessed::class => [
+            \App\Listeners\SendRegistrationStatusEmail::class,
+        ],
     ];
 
     /**

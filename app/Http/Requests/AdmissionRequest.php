@@ -8,18 +8,17 @@ class AdmissionRequest extends FormRequest
 {
     public function authorize()
     {
-        // Allow teacher middleware to handle authorization
         return true;
     }
 
     public function rules()
     {
         return [
-            'student_id'        => 'required|exists:students,student_id',
-            'batch_id'          => 'required|exists:batches,id',
-            'admission_number'  => 'required|unique:admissions,admission_number',
-            'roll_number'       => 'required|unique:admissions,roll_number',
+
+          
+            'batch_id'   => 'required|exists:batches,id',
+            'students'  => 'required|array|min:1',
+            'students.*' => 'required|integer|exists:students,student_id',
         ];
     }
-
 }

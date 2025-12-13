@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+//use App\Jobs\SendRegisterStatusMailJob;
+use App\Events\StudentRegistrationProcessed;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB; 
@@ -14,7 +16,15 @@ class FacultyController extends Controller
     private const STATUS_APPROVED = 1; 
     private const STATUS_REJECTED = 2; 
 
-    public function approveStudent(int $id, StudentEnrollmentService $enrollmentService): JsonResponse
+    /** @var StudentEnrollmentService */
+    private $enrollmentService;   // <---- DECLARED HERE
+
+    public function __construct(StudentEnrollmentService $enrollmentService)
+    {
+        $this->enrollmentService = $enrollmentService;  
+    }
+
+    public function approveStudent(int $id): JsonResponse
     {
         $registration = DB::table('student_registrations')->where('id', $id)->first();
         if (!$registration) {
@@ -23,10 +33,15 @@ class FacultyController extends Controller
 
         $this->updateRegistrationStatus($id, self::STATUS_APPROVED);
 
-        $enrollmentService->enrollStudent($registration);
+        // use service from constructor
+        $this->enrollmentService->enrollStudent($registration);
+
+      //  dispatch(new SendRegisterStatusMailJob((object)$registration, 'approved'));
+      event(new \App\Events\StudentRegistrationProcessed((object)$registration, 'approved'));
+
 
         return response()->json([
-            'message' => 'Registration approved successfully. Student enrollment process initiated.',
+            'message' => 'Registration approved successfully. Student enrollment initiated.',
             'registration_id' => $id,
             'new_status' => self::STATUS_APPROVED,
         ], 200);
@@ -40,6 +55,9 @@ class FacultyController extends Controller
         }
 
         $this->updateRegistrationStatus($id, self::STATUS_REJECTED);
+
+      //  dispatch(new SendRegisterStatusMailJob((object)$registration, 'rejected'));
+      event(new \App\Events\StudentRegistrationProcessed((object)$registration, 'approved'));
 
         return response()->json([
             'message' => 'Registration rejected successfully.',
@@ -58,36 +76,30 @@ class FacultyController extends Controller
             ]);
     }
 
-
-
-
     public function showRegistrations(Request $request): JsonResponse
     {
-        // 1. Retrieve all student registrations using Query Builder
         $registrations = DB::table('student_registrations')
             ->select(
                 'id as application_id',
                 'first_name',
                 'last_name',
-                'programme_name' ,
+                'programme_name',
                 'phone_no',
                 'created_at as submitted_on'
-                
-            )->where('status', self::STATUS_PENDING) // ⚠️ Filter for pending status (0)
+            )
+            ->where('status', self::STATUS_PENDING)
             ->get();
-           
 
         if ($registrations->isEmpty()) {
             return response()->json([
-                'message' => 'There are no student registration applications at this time.'
+                'message' => 'There are no pending applications.'
             ], 200);
         }
 
-        // 2. Successful Response - Returning the raw database results
         return response()->json([
             'message' => 'Student registrations retrieved successfully.',
-            'pending applications' => $registrations->count(),
-            'data' => $registrations, // ⚠️ Returning the raw database collection/array
+            'pending_applications' => $registrations->count(),
+            'data' => $registrations,
         ], 200);
     }
 }
