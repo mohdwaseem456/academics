@@ -52,11 +52,16 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/batchattendances', [AttendanceController::class, 'showBatchAttendance']);
         Route::get('/programmeattendances', [AttendanceController::class, 'showProgrammeAttendance']);
         Route::get('/programmestudents', [ProgrammeController::class, 'showProgrammeStudents']);
-                                      ///////
+                                      //////////
         Route::post('/paper_assessments', [PaperController::class, 'assignAssessment']);
+        Route::get('/paper_assessments', [PaperController::class, 'showAssessments']);
+        Route::delete('/paper_assessments', [PaperController::class, 'deleteAssessment']);
+        Route::put('/paper_assessments', [PaperController::class, 'updateAssessment']);
+                                     ///////////
         Route::post('/mark_assessment', [PaperController::class, 'markEntry']);
         Route::get('/mark_assessment', [PaperController::class, 'showMarklist']);
         Route::post('/mark_paper', [PaperController::class, 'markFinalise']);
+        Route::get('/mark_export', [PaperController::class, 'markExport']);
 
         
     });
